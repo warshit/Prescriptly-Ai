@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ShieldCheck, MapPin, Truck, CreditCard, AlertCircle, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { usePrescription } from '../context/PrescriptionContext';
 import { Button } from '../components/Button';
 
 interface FormData {
@@ -19,6 +20,7 @@ interface FormErrors {
 
 export const Checkout: React.FC = () => {
   const { items, subtotal, isInitialized } = useCart();
+  const { prescriptionData } = usePrescription();
   const navigate = useNavigate();
   
   // Pricing Logic (Consistent with Cart)
@@ -123,6 +125,12 @@ export const Checkout: React.FC = () => {
     });
 
     if (isValid) {
+      // ensure prescription exists for Rx items
+      if (items.some(i => i.requiresPrescription) && !prescriptionData) {
+        window.alert('Your cart contains prescription-only medicines. Please upload a valid prescription (with doctor details) before proceeding to checkout.');
+        navigate('/upload');
+        return;
+      }
       // Navigate to payment simulation
       navigate('/payment');
     } else {

@@ -17,6 +17,10 @@ export const Upload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Doctor info (for prescription validation)
+  const [doctorName, setDoctorName] = useState('');
+  const [doctorId, setDoctorId] = useState('');
+
   // Analysis State
   const [isScanning, setIsScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
@@ -231,7 +235,9 @@ export const Upload: React.FC = () => {
           imageBase64: base64Data,
           fileName: file.name,
           uploadedAt: new Date(),
-          analysisText: analysisText
+          analysisText: analysisText,
+          doctorName: doctorName || undefined,
+          doctorId: doctorId || undefined
         });
         setScanComplete(true);
       }
@@ -279,6 +285,29 @@ export const Upload: React.FC = () => {
         <p className="text-slate-500 max-w-2xl mx-auto">
             Our AI will scan your prescription, automatically match medicines, and prepare your cart.
         </p>
+
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Doctor Name</label>
+            <input
+              type="text"
+              value={doctorName}
+              onChange={(e) => setDoctorName(e.target.value)}
+              className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm p-2"
+              placeholder="e.g. Dr. R. Sharma"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Doctor ID</label>
+            <input
+              type="text"
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm p-2"
+              placeholder="e.g. MD12345"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden transition-all duration-500">

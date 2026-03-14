@@ -203,7 +203,7 @@ export const Chatbot: React.FC = () => {
                 const medicinesList = lastScannedItems.map(item => 
                     `- ${item.name} (Quantity: ${item.quantity}${item.addedToCart ? ', Already in cart' : ''})`
                 ).join('\n');
-                
+
                 prescriptionContext = `
                 
 *** UPLOADED PRESCRIPTION CONTEXT ***
@@ -213,6 +213,9 @@ ${prescriptionData.analysisText}
 
 Medicines identified from prescription:
 ${medicinesList}
+
+Doctor Name: ${prescriptionData.doctorName || 'N/A'}
+Doctor ID: ${prescriptionData.doctorId || 'N/A'}
 
 Upload Date: ${prescriptionData.uploadedAt?.toLocaleString()}
 File: ${prescriptionData.fileName}
@@ -276,6 +279,7 @@ Always be helpful and provide context-aware responses based on their prescriptio
             7. If a user describes symptoms, suggest relevant OTC medicines from the inventory, but advise consulting a doctor.
             8. If the user asks for a medicine not in inventory, apologize and say it's unavailable.
             9. **CLEAR CART RULE**: If the user asks to clear, empty, or remove all items from the cart, you MUST ask for confirmation first (e.g., "Are you sure you want to clear your cart?"). ONLY call the 'clearCart' tool if the user explicitly confirms (yes, sure, do it).
+            10. **PRESCRIPTION SAFETY**: If the user expresses intent to access or purchase a classified/Rx-only medicine, you must ask them for a valid prescription (doctor name/ID or upload) before recommending or adding the item to the cart. Do not make any purchases without the prescription details.
 
             *** FORMATTING EXAMPLES ***
             Good:
@@ -316,6 +320,20 @@ Always be helpful and provide context-aware responses based on their prescriptio
                     const med = MEDICINES.find(m => m.name.toLowerCase() === medicineName.toLowerCase());
                     
                     if (med) {
+                        // If the medicine is prescription-only, enforce that user has provided a prescription
+                        if (med.requiresPrescription) {
+                            if (!prescriptionData || (!prescriptionData.doctorId && !prescriptionData.doctorName && !prescriptionData.analysisText)) {
+                                functionResponses.push({
+                                    functionResponse: {
+                                        name: "addToCart",
+                                        response: { result: `Error: ${med.name} requires a valid prescription. Please upload a prescription or provide the doctor's name/ID before proceeding.` },
+                                        id: call.id
+                                    }
+                                });
+                                continue;
+                            }
+                        }
+
                         if (med.inStock !== false) {
                             // EXECUTE REAL ACTION
                             addToCart(med, qty);
@@ -406,8 +424,14 @@ Always be helpful and provide context-aware responses based on their prescriptio
                </p>
             </div>
             {prescriptionData && (
-              <div className="bg-white/20 px-2 py-1 rounded-full">
+              <div className="bg-white/20 px-2 py-1 rounded-full flex flex-col items-center">
                 <p className="text-[10px] text-white font-medium">📋 Prescription Loaded</p>
+                {(prescriptionData.doctorName || prescriptionData.doctorId) && (
+                  <p className="text-[8px] text-white mt-0.5">
+                    {prescriptionData.doctorName ? prescriptionData.doctorName : ''}
+                    {prescriptionData.doctorId ? ` (${prescriptionData.doctorId})` : ''}
+                  </p>
+                )}
               </div>
             )}
           </div>

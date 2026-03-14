@@ -6,6 +6,9 @@ interface PrescriptionData {
   fileName?: string;
   uploadedAt?: Date;
   analysisText?: string;
+  // doctor information provided by the user (if any)
+  doctorName?: string;
+  doctorId?: string;
 }
 
 interface PrescriptionContextType {

@@ -41,6 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!auth) {
         console.warn("Firebase Auth not initialized (missing config). Using Mock Authentication for demo purposes.");
         setIsMockAuth(true);
+
+        // Do NOT restore mock sessions automatically on startup.
+        // Require explicit sign-in to create a mock session for demo/testing.
         setLoading(false);
         return;
     }
@@ -48,6 +51,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
+      // Persist user session logic is handled automatically by Firebase Auth
+      if (user) {
+        localStorage.setItem('prescriptly_user_uid', user.uid);
+      } else {
+        localStorage.removeItem('prescriptly_user_uid');
+      }
     });
 
     return unsubscribe;
@@ -92,27 +101,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const googleSignIn = async () => {
     if (isMockAuth) {
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
         const mockUser = createMockUser('demo-user@gmail.com');
         mockUser.displayName = 'Demo User';
         setCurrentUser(mockUser);
+        // Do NOT persist mock user to localStorage to avoid auto-login on startup
         return;
     }
 
     if (!auth || !googleProvider) {
-        throw new Error("Google Sign-In is unavailable. Please check your Firebase configuration.");
+        throw new Error("Authentication service is unavailable (missing configuration).");
     }
     try {
       await signInWithPopup(auth, googleProvider);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Google Sign In Error:", error);
-      if (error.code === 'auth/popup-closed-by-user') {
-        throw new Error('Sign-in popup was closed. Please try again.');
-      } else if (error.code === 'auth/popup-blocked') {
-        throw new Error('Sign-in popup was blocked by your browser. Please allow popups and try again.');
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        throw new Error('Another sign-in popup is already open.');
-      }
       throw error;
     }
   };
@@ -122,21 +125,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await new Promise(resolve => setTimeout(resolve, 1000));
         const mockUser = createMockUser(email);
         setCurrentUser(mockUser);
+        // Do NOT persist mock user to localStorage to avoid auto-login on startup
         return;
     }
 
-    if (!auth) throw new Error("Authentication service is unavailable. Please check your Firebase configuration.");
+    if (!auth) throw new Error("Authentication service is unavailable.");
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Signup Error:", error);
-      if (error.code === 'auth/email-already-in-use') {
-        throw new Error('An account with this email already exists.');
-      } else if (error.code === 'auth/weak-password') {
-        throw new Error('Password must be at least 6 characters long.');
-      } else if (error.code === 'auth/invalid-email') {
-        throw new Error('Invalid email address.');
-      }
       throw error;
     }
   };
@@ -146,21 +143,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await new Promise(resolve => setTimeout(resolve, 1000));
         const mockUser = createMockUser(email);
         setCurrentUser(mockUser);
+        // Do NOT persist mock user to localStorage to avoid auto-login on startup
         return;
     }
 
-    if (!auth) throw new Error("Authentication service is unavailable. Please check your Firebase configuration.");
+    if (!auth) throw new Error("Authentication service is unavailable.");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login Error:", error);
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        throw new Error('Invalid email or password.');
-      } else if (error.code === 'auth/invalid-email') {
-        throw new Error('Invalid email address.');
-      } else if (error.code === 'auth/too-many-requests') {
-        throw new Error('Too many failed login attempts. Please try again later.');
-      }
       throw error;
     }
   };
@@ -169,13 +160,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isMockAuth) {
         await new Promise(resolve => setTimeout(resolve, 500));
         setCurrentUser(null);
+        // No persisted mock user to remove (we don't persist mock sessions)
         return;
     }
 
     if (!auth) return;
     try {
       await signOut(auth);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Logout Error:", error);
       throw error;
     }
