@@ -263,40 +263,6 @@ npm run preview
 - Reusable utility functions
 - Consistent naming conventions
 
-## 🌐 Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## 📱 Responsive Design
-
-- Mobile-first approach
-- Tablet optimization
-- Desktop layouts
-- Touch-friendly interfaces
-- Adaptive navigation
-
-## 🔮 Future Enhancements
-
-- [ ] Prescription history tracking
-- [ ] Automatic refill reminders
-- [ ] Multi-language support
-- [ ] Payment gateway integration
-- [ ] Order tracking system
-- [ ] Doctor consultation feature
-- [ ] Medicine delivery tracking
-- [ ] User reviews and ratings
-- [ ] Loyalty program
-- [ ] Medicine interaction database
-
-## 📄 Documentation
-
-- [Authentication Fixes](./AUTH_FIXES.md) - Details about authentication improvements
-- [Prescription AI Feature](./PRESCRIPTION_AI_FEATURE.md) - Prescription analysis documentation
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow these steps:
@@ -317,17 +283,7 @@ This project is licensed under the MIT License.
 - **AI Integration**: Google Gemini AI
 - **Authentication**: Firebase
 
-## 📞 Support
 
-For support, email support@prescriptly.ai or open an issue in the GitHub repository.
-
-## 🙏 Acknowledgments
-
-- Google Gemini AI for powerful AI capabilities
-- Firebase for authentication and backend services
-- Unsplash for medicine images
-- Lucide React for beautiful icons
-- React community for excellent tools and libraries
 
 ---
 
